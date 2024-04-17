@@ -2,7 +2,7 @@ from django.http import HttpResponseServerError
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from raterapi.models import Game
+from raterapi.models import Game, game
 from django.contrib.auth.models import User
 
 
@@ -38,18 +38,18 @@ class GameView(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    #     def retrieve(self, request, pk=None):
-    #         """Handle GET requests for single item
+    def retrieve(self, request, pk=None):
+        """Handle GET requests for single item
 
-    #         Returns:
-    #             Response -- JSON serialized instance
-    #         """
-    #         try:
-    #             games = Void.objects.get(pk=pk)
-    #             serializer = VoidSerializer(void)
-    #             return Response(serializer.data)
-    #         except Exception as ex:
-    #             return Response({"reason": ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+        Returns:
+            Response -- JSON serialized instance
+        """
+        try:
+            game = Game.objects.get(pk=pk)
+            serializer = GameSerializer(game)
+            return Response(serializer.data)
+        except Exception as ex:
+            return Response({"reason": ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
     #     def update(self, request, pk=None):
     #         """Handle PUT requests
@@ -103,14 +103,17 @@ class GameView(ViewSet):
 
 
 class UserGameSerializer(serializers.ModelSerializer):
+
+    firstName = serializers.CharField(source="first_name")
+    lastName = serializers.CharField(source="last_name")
     """JSON Serializer"""
 
     class Meta:
         model = User
         fields = (
             "id",
-            "first_name",
-            "last_name",
+            "firstName",
+            "lastName",
             "username",
         )
 
@@ -119,6 +122,11 @@ class GameSerializer(serializers.ModelSerializer):
     """JSON Serializer"""
 
     user = UserGameSerializer(many=False)
+    yearReleased = serializers.DateField(source="year_released")
+    numberOfPlayers = serializers.IntegerField(source="number_of_players")
+    estimatedTimeToPlay = serializers.CharField(source="estimated_time_to_play")
+    ageRecommendation = serializers.IntegerField(source="age_recommendation")
+    imageUrl = serializers.CharField(source="image_url")
 
     class Meta:
         model = Game
@@ -127,10 +135,10 @@ class GameSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "designer",
-            "year_released",
-            "number_of_players",
-            "estimated_time_to_play",
-            "age_recommendation",
+            "yearReleased",
+            "numberOfPlayers",
+            "estimatedTimeToPlay",
+            "ageRecommendation",
             "user",
-            "image_url",
+            "imageUrl",
         )
